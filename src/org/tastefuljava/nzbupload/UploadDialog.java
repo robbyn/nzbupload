@@ -16,13 +16,13 @@ import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import org.tastefuljava.nzbupload.Uploader.Property;
 
 public class UploadDialog extends JDialog {
     private static final Logger LOG
             = Logger.getLogger(UploadDialog.class.getName());
 
-    private static final String CONF_FILE = "nzbupload.properties";
-    private static final String HOME = System.getProperty("user.home");
+
     private final Properties props = new Properties();
     private final String start;
     private final String stop;
@@ -50,6 +50,10 @@ public class UploadDialog extends JDialog {
         jLabel3 = new javax.swing.JLabel();
         changeOutput = new javax.swing.JButton();
         output = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        requestURL = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        apiKey = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         startStop = new javax.swing.JButton();
 
@@ -105,6 +109,32 @@ public class UploadDialog extends JDialog {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 11);
         getContentPane().add(output, gridBagConstraints);
+
+        jLabel2.setText("Request URL:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 11);
+        getContentPane().add(jLabel2, gridBagConstraints);
+
+        requestURL.setText("http://localhost:8800/sabnzbd/api");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 11);
+        getContentPane().add(requestURL, gridBagConstraints);
+
+        jLabel4.setText("NZB Key:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 11);
+        getContentPane().add(jLabel4, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 11);
+        getContentPane().add(apiKey, gridBagConstraints);
 
         jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 0, 0));
 
@@ -171,98 +201,58 @@ public class UploadDialog extends JDialog {
         }
     }//GEN-LAST:event_startStopActionPerformed
 
-    public static void showDialog() {
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(UploadDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(UploadDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(UploadDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(UploadDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    UploadDialog dialog = new UploadDialog(new javax.swing.JFrame());
-                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                        @Override
-                        public void windowClosing(java.awt.event.WindowEvent e) {
-                            System.exit(0);
-                        }
-                    });
-                    dialog.setVisible(true);
-                } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
-            }
-        });
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField apiKey;
     private javax.swing.JButton changeInput;
     private javax.swing.JButton changeOutput;
     private javax.swing.JLabel input;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel output;
+    private javax.swing.JTextField requestURL;
     private javax.swing.JButton startStop;
     // End of variables declaration//GEN-END:variables
 
     private void loadConf(String name) throws IOException {
-        File file = new File(HOME, name);
-        if (file.isFile()) {
-            try (InputStream stream = new FileInputStream(file);
-                    Reader in = new InputStreamReader(stream, "UTF-8")) {
-                props.load(in);
-            }
-        }
+        props.putAll(Configuration.load(name));
     }
 
     private void saveConf(String name) throws IOException {
-        File file = new File(HOME, name);
-        try (OutputStream stream = new FileOutputStream(file);
-                Writer out = new OutputStreamWriter(stream, "UTF-8")) {
-            props.store(out, "NZB Uploader configuration");
-        }
+        Configuration.save(props, name);
     }
 
     private void propsToScreen() throws IOException {
-        loadConf(CONF_FILE);
-        String inputDir = new File(HOME, "Downloads").toString();
-        input.setText(props.getProperty(Uploader.PROP_INPUTDIR, inputDir));
+        loadConf(Configuration.CONF_FILE);
+        String inputDir = new File(Configuration.HOME, "Downloads").toString();
+        input.setText(Property.INPUT_DIR.get(props, inputDir));
         String outputDir = new File(inputDir, "_nzb").toString();
-        output.setText(props.getProperty(Uploader.PROP_OUTPUTDIR, outputDir));
+        output.setText(Property.OUTPUT_DIR.get(props, outputDir));
+        String url = Property.REQUEST_URL.get(props,
+                "http://localhost:8800/sabnzbd/api");
+        requestURL.setText(url);
+        String key = Property.API_KEY.get(props, "");
+        apiKey.setText(key);
         pack();
     }
 
     private void screenToProps() throws IOException {
-        props.setProperty(Uploader.PROP_INPUTDIR, input.getText());
-        props.setProperty(Uploader.PROP_OUTPUTDIR, output.getText());
-        saveConf(CONF_FILE);
+        Property.INPUT_DIR.set(props, input.getText());
+        Property.OUTPUT_DIR.set(props, output.getText());
+        Property.REQUEST_URL.set(props, requestURL.getText());
+        Property.API_KEY.set(props, apiKey.getText());
+        saveConf(Configuration.CONF_FILE);
     }
 
     private void start() {
         try {
             screenToProps();
             uploader = new Uploader(props);
-            uploader.start();
+            Thread thread = new Thread(uploader);
+            thread.setDaemon(true);
+            thread.start();
             startStop.setText(stop);
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);

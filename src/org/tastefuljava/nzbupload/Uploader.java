@@ -10,11 +10,35 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.tastefuljava.json.JSon;
 
-public class Uploader extends Thread {
+public class Uploader implements Runnable {
     private static final Logger LOG = Logger.getLogger(Uploader.class.getName());
 
-    public static final String PROP_INPUTDIR = "input-dir";
-    public static final String PROP_OUTPUTDIR = "output-dir";
+    public static enum Property {
+        INPUT_DIR, OUTPUT_DIR, REQUEST_URL, API_KEY;
+
+        private final String key = name().toLowerCase().replace('_', '-');
+
+        public static Property forKey(String key) {
+            for (Property prop: values()) {
+                if (prop.key.equals(key)) {
+                    return prop;
+                }
+            }
+            return null;
+        }
+
+        public String get(Properties props) {
+            return props.getProperty(key);
+        }
+
+        public String get(Properties props, String def) {
+            return props.getProperty(key, def);
+        }
+
+        public void set(Properties props, String value) {
+            props.setProperty(key, value);
+        }
+    }
 
     private final Properties props;
     private boolean stopped = false;
@@ -22,7 +46,6 @@ public class Uploader extends Thread {
     public Uploader(Properties props) {
         this.props = new Properties();
         this.props.putAll(props);
-        this.setDaemon(true);
     }
 
     public synchronized boolean isStopped() {
@@ -49,12 +72,12 @@ public class Uploader extends Thread {
     }
 
     private void delay(long duration) throws InterruptedException {
-        sleep(duration);
+        Thread.sleep(duration);
     }
 
     private void uploadAll() throws IOException {
-        File inputDir = new File(props.getProperty(PROP_INPUTDIR));
-        File outputDir = new File(props.getProperty(PROP_OUTPUTDIR));
+        File inputDir = new File(Property.INPUT_DIR.get(props));
+        File outputDir = new File(Property.OUTPUT_DIR.get(props));
         String[] names = findInputFiles(inputDir);
         if (names == null || names.length == 0) {
             LOG.info("no file to upload");
@@ -63,6 +86,11 @@ public class Uploader extends Thread {
             for (String name: names) {
                 LOG.log(Level.INFO, "File to upload: {0}", name);
                 File file = new File(inputDir, name);
+                if (!outputDir.isDirectory() && !outputDir.mkdirs()) {
+                    String msg = "Could not create dir: " + outputDir;
+                    LOG.severe(msg);
+                    throw new IOException(msg);
+                }
                 File outFile = new File(outputDir, name);
                 if (outFile.exists()) {
                     LOG.log(Level.WARNING, "Overwriting file: {0}", outFile);
@@ -88,10 +116,10 @@ public class Uploader extends Thread {
     }
 
     private void upload(File file) throws IOException {
-        String requestURL = props.getProperty("request-url");
+        String requestURL = Property.REQUEST_URL.get(props);
         Multipart multipart = new Multipart(requestURL, "UTF-8");
         multipart.addFormField("output", "json");
-        multipart.addFormField("apikey", props.getProperty("api-key"));
+        multipart.addFormField("apikey", Property.API_KEY.get(props));
         multipart.addFormField("mode", "addfile");
         multipart.addFilePart("name", file);
         String json = multipart.complete();
