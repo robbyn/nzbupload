@@ -43,7 +43,8 @@ public class JSonTest {
 
     @Test
     public void testFormatted() throws Exception {
-        TestObject obj1 = new TestObject();
+        TestObject obj1 = new TestObject(
+                BigDecimal.valueOf(123, 2), new Date(), "Hello world!!!");
         String json1 = JSon.stringify(obj1, true);
         TestObject obj2 = JSon.parse(json1, TestObject.class);
         assertEquals(obj1, obj2);
@@ -52,9 +53,23 @@ public class JSonTest {
     }
 
     public static class TestObject {
-        private final BigDecimal number = BigDecimal.valueOf(123, 2);
-        private final Date date = new Date();
-        private final String string = "Hello world!!!";
+        private final BigDecimal number;
+        private final Date date;
+        private final String string;
+
+        public TestObject() {
+            this(null, null, null);
+        }
+
+        public TestObject(BigDecimal number, Date date, String string) {
+            this.number = number;
+            this.date = date;
+            this.string = string;
+        }
+
+        public String getMessage() {
+            return "Test message";
+        }
 
         @Override
         public int hashCode() {
