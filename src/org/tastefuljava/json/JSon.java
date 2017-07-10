@@ -11,8 +11,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.tastefuljava.props.Properties;
@@ -167,12 +171,17 @@ public class JSon {
         @Override
         public void endArray() {
             top = stack.remove(0);
+            List<?> list = (List<?>)top;
             if (clazz.isArray()) {
-                @SuppressWarnings("unchecked")
-                List<Object> list = (List<Object>)top;
                 int length = list.size();
                 top = list.toArray((Object[])Array.newInstance(
                         clazz.getComponentType(), length));
+            } else if (clazz.isAssignableFrom(List.class)) {
+                // nothing to do
+            } else if (clazz.isAssignableFrom(SortedSet.class)) {
+                top = new TreeSet<>(list);
+            } else if (clazz.isAssignableFrom(Set.class)) {
+                top = new HashSet<>(list);
             }
         }
 
