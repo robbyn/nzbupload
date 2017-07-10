@@ -56,7 +56,7 @@ public class JSonTest {
                     BigDecimal.valueOf(123, 2), new Date(), "Hello world!!!",
                     new int[] {1,2,3});
             String json1 = JSon.stringify(obj1, true);
-            LOG.info("JSon: " + json1);
+            LOG.log(Level.INFO, "JSon: {0}", json1);
             TestObject obj2 = JSon.parse(json1, TestObject.class);
             assertEquals(obj1, obj2);
             String json2 = JSon.stringify(obj2, true);
