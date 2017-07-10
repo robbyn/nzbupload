@@ -86,7 +86,7 @@ public class Multipart implements Closeable {
         println();
     }
 
-    public void addHeaderField(String name, String value) throws IOException {
+    public void addHeader(String name, String value) throws IOException {
         println(name + ": " + value);
     }
 
