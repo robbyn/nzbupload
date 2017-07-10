@@ -104,7 +104,7 @@ public class JSonWriter {
         }
     }
 
-    public void printProps(Object value, String... propNames) {
+    private void printProps(Object value, String... propNames) {
         Class<?> clazz = value.getClass();
         for (String propName: propNames) {
             try {
