@@ -6,8 +6,12 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Properties {
+    private static final Logger LOG
+            = Logger.getLogger(FieldProperty.class.getName());
     private static final Map<Class<?>,Map<String,Property>> CLASS_PROPERTIES
             = new HashMap<>();
 
@@ -26,8 +30,11 @@ public class Properties {
 
     private static void extractProperties(Class<?> clazz,
             Map<String, Property> props) {
+        long tm = System.nanoTime();
         extractFieldProps(clazz, props);
         extractMethodProps(clazz, props);
+        tm = System.nanoTime()-tm;
+        LOG.log(Level.INFO, "Properties extracted in {0}ns", tm);
     }
 
     private static void extractFieldProps(Class<?> clazz,
@@ -57,13 +64,15 @@ public class Properties {
             String name = e.getKey();
             Method getter = e.getValue();
             Method setter = setters.get(name);
-            props.put(name, new MethodProperty(name, getter, setter));
+            props.put(name, new MethodProperty(
+                    name, getter.getReturnType(), getter, setter));
         }
         for (Map.Entry<String,Method> e: setters.entrySet()) {
             String name = e.getKey();
             if (!getters.containsKey(name)) {
                 Method setter = e.getValue();
-                props.put(name, new MethodProperty(name, null, setter));
+                props.put(name, new MethodProperty(
+                        name, setter.getParameterTypes()[0], null, setter));
             }
         }
     }

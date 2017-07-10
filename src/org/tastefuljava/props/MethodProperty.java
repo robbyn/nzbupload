@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MethodProperty implements Property {
+public class MethodProperty extends Property {
     private static final Logger LOG
             = Logger.getLogger(MethodProperty.class.getName());
 
@@ -13,7 +13,8 @@ public class MethodProperty implements Property {
     private final Method getter;
     private final Method setter;
 
-    MethodProperty(String name, Method getter, Method setter) {
+    MethodProperty(String name, Class<?> type, Method getter, Method setter) {
+        super(name, type);
         if (getter == null && setter == null) {
             throw new IllegalArgumentException(
                     "Getter and setter cannot both be null.");
@@ -21,20 +22,6 @@ public class MethodProperty implements Property {
         this.name = name;
         this.getter = getter;
         this.setter = setter;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Class<?> getType() {
-        if (getter != null) {
-            return getter.getReturnType();
-        } else {
-            return setter.getParameterTypes()[0];
-        }
     }
 
     @Override
