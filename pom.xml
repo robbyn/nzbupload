@@ -30,6 +30,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <excludeGroupIds>junit,org.hamcrest</excludeGroupIds>
                         </configuration>
                     </execution>
                 </executions>
