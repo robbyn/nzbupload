@@ -42,7 +42,7 @@ public class JSonTest {
     public void testUnformatted() throws Exception {
         TestObject obj1 = new TestObject();
         String json1 = JSon.stringify(obj1, false);
-        LOG.info("JSon: " + json1);
+        LOG.log(Level.INFO, "JSon: {0}", json1);
         TestObject obj2 = JSon.parse(json1, TestObject.class);
         assertEquals(obj1, obj2);
         String json2 = JSon.stringify(obj2, false);
@@ -63,6 +63,7 @@ public class JSonTest {
             assertEquals(json1, json2);
         } catch (Throwable ex) {
             LOG.log(Level.SEVERE, null, ex);
+            fail(ex.getMessage());
         }
     }
 

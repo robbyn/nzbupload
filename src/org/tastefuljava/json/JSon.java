@@ -174,8 +174,12 @@ public class JSon {
             List<?> list = (List<?>)top;
             if (clazz.isArray()) {
                 int length = list.size();
-                top = list.toArray((Object[])Array.newInstance(
-                        clazz.getComponentType(), length));
+                Class<?> elmType = clazz.getComponentType();
+                top = Array.newInstance(elmType, length);
+                for (int i = 0; i < length; ++i) {
+                    Object elm = convert(list.get(i), elmType);
+                    Array.set(top, i, elm);
+                }
             } else if (clazz.isAssignableFrom(List.class)) {
                 // nothing to do
             } else if (clazz.isAssignableFrom(SortedSet.class)) {
