@@ -1,7 +1,11 @@
 package org.tastefuljava.json;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -18,6 +22,10 @@ import org.tastefuljava.util.InvocationLogger;
 public class JSon {
     private static final Logger LOG = Logger.getLogger(JSon.class.getName());
 
+    public static <T> T parse(String json, Class<T> clazz) throws IOException {
+        return parse(new StringReader(json), clazz);
+    }
+
     public static <T> T parse(Reader in, Class<T> clazz)
             throws IOException {
         Handler handler = new Handler(clazz);
@@ -25,6 +33,28 @@ public class JSon {
                 Level.INFO, handler, JSonHandler.class);
         JSonParser.parse(in, jsonHandler);
         return clazz.cast(handler.top);
+    }
+
+    public static void write(Object object, PrintWriter out, boolean format) {
+        try (JSonFormatter fmt = new JSonFormatter(out, format)) {
+            visit(object, fmt);
+        }
+    }
+
+    public static void write(Object object, Writer writer, boolean format) {
+        if (writer instanceof PrintWriter) {
+            write(object, (PrintWriter)writer, format);
+        } else {
+            try (PrintWriter out = new PrintWriter(writer)) {
+                write(object, out, format);
+            }
+        }
+    }
+
+    public static String stringify(Object object, boolean format) {
+        StringWriter writer = new StringWriter();
+        write(object, writer, format);
+        return writer.toString();
     }
 
     public static void visit(Object object, JSonHandler handler) {
