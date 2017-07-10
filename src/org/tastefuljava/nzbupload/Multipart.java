@@ -15,9 +15,14 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Random;
 
 public class Multipart implements Closeable {
     private static final String EOL = "\r\n";
+    private static final char[] BOUNDARY_CHARS
+            = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+                    .toCharArray();
+    private static final int BOUNDARY_LENGTH = 32;
 
     private final String boundary;
     private final HttpURLConnection cnt;
@@ -37,14 +42,12 @@ public class Multipart implements Closeable {
     public Multipart(String requestURL, String encoding)
             throws IOException {
         this.encoding = encoding;
-
-        // creates a unique boundary based on time stamp
-        boundary = "===" + System.currentTimeMillis() + "===";
+        boundary = randomBoundary(BOUNDARY_CHARS, BOUNDARY_LENGTH);
 
         URL url = new URL(requestURL);
         cnt = (HttpURLConnection) url.openConnection();
         cnt.setUseCaches(false);
-        cnt.setDoOutput(true); // indicates POST method
+        cnt.setDoOutput(true);
         cnt.setDoInput(true);
         cnt.setRequestProperty("Content-Type",
                 "multipart/form-data; boundary=" + boundary);
@@ -53,7 +56,7 @@ public class Multipart implements Closeable {
         out = new PrintWriter(new BufferedWriter(writer));
     }
 
-    public void addFormField(String name, String value) throws IOException {
+    public void addField(String name, String value) throws IOException {
         println("--" + boundary);
         println("Content-Disposition: form-data; name=\"" + name + "\"");
         println("Content-Type: text/plain; charset=" + encoding);
@@ -61,7 +64,7 @@ public class Multipart implements Closeable {
         println(value);
     }
 
-    public void addFilePart(String name, File file)
+    public void addFile(String name, File file)
             throws IOException {
         String fileName = file.getName();
         String mimeType = URLConnection.guessContentTypeFromName(fileName);
@@ -117,5 +120,14 @@ public class Multipart implements Closeable {
 
     private void println() throws IOException {
         out.write(EOL);
+    }
+
+    private String randomBoundary(char[] alphabet, int length) {
+        Random rand = new Random();
+        char[] chars = new char[length];
+        for (int i = 0; i < length; ++i) {
+            chars[i] = alphabet[rand.nextInt(alphabet.length)];
+        }
+        return new String(chars);
     }
 }

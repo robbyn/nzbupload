@@ -118,10 +118,10 @@ public class Uploader implements Runnable {
     private void upload(File file) throws IOException {
         String requestURL = Property.REQUEST_URL.get(props);
         Multipart multipart = new Multipart(requestURL, "UTF-8");
-        multipart.addFormField("output", "json");
-        multipart.addFormField("apikey", Property.API_KEY.get(props));
-        multipart.addFormField("mode", "addfile");
-        multipart.addFilePart("name", file);
+        multipart.addField("output", "json");
+        multipart.addField("apikey", Property.API_KEY.get(props));
+        multipart.addField("mode", "addfile");
+        multipart.addFile("name", file);
         String json = multipart.complete();
         Reader reader = new StringReader(json);
         UploadResult result = JSon.parse(reader, UploadResult.class);
