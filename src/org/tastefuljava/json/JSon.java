@@ -3,9 +3,6 @@ package org.tastefuljava.json;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -212,5 +209,4 @@ public class JSon {
             }
         }
     }
-
 }
