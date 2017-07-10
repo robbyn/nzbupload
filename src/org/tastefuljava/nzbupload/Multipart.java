@@ -56,6 +56,10 @@ public class Multipart implements Closeable {
         out = new PrintWriter(new BufferedWriter(writer));
     }
 
+    public void addHeader(String name, String value) throws IOException {
+        println(name + ": " + value);
+    }
+
     public void addField(String name, String value) throws IOException {
         println("--" + boundary);
         println("Content-Disposition: form-data; name=\"" + name + "\"");
@@ -84,10 +88,6 @@ public class Multipart implements Closeable {
         }
 
         println();
-    }
-
-    public void addHeader(String name, String value) throws IOException {
-        println(name + ": " + value);
     }
 
     public String complete() throws IOException {
@@ -122,7 +122,7 @@ public class Multipart implements Closeable {
         out.write(EOL);
     }
 
-    private String randomBoundary(char[] alphabet, int length) {
+    private static String randomBoundary(char[] alphabet, int length) {
         Random rand = new Random();
         char[] chars = new char[length];
         for (int i = 0; i < length; ++i) {
