@@ -79,6 +79,23 @@ public class JSon {
                     handler.endElement();
                 }
                 handler.endArray();
+            } else if (Iterable.class.isAssignableFrom(clazz)) {
+                Iterable<?> able = (Iterable<?>)object;
+                handler.startArray();
+                for (Object elm: able) {
+                    handler.startElement();
+                    visit(elm, handler);
+                    handler.endElement();
+                } 
+                handler.endArray();
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                Map<?,?> map = (Map<?,?>)object;
+                for (Map.Entry<?,?> e: map.entrySet()) {
+                    String name = e.getKey().toString();
+                    handler.startField(name);
+                    visit(e.getValue(), handler);
+                    handler.endField(name);
+                }
             } else {
                 Map<String,Property> props = Properties.classProperties(clazz);
                 handler.startObject();
