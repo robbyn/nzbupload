@@ -3,9 +3,10 @@ package org.tastefuljava.json;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import org.tastefuljava.props.Properties;
+import org.tastefuljava.props.Property;
 
 public class JSonWriter {
     private final JSonHandler handler;
@@ -59,6 +60,13 @@ public class JSonWriter {
     public void printObject(Object value) {
         handler.startObject();
         try {
+            Map<String,Property> props = Properties.classProperties(
+                    value.getClass());
+            for (Property prop: props.values()) {
+                if (prop.canGet()) {
+                    
+                }
+            }
             for (Method method: value.getClass().getMethods()) {
                 if (method.getDeclaringClass() == Object.class) {
                     // skip

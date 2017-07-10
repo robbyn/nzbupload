@@ -1,6 +1,10 @@
 package org.tastefuljava.props;
 
-public interface Property<O,P> {
-    public P get(O object);
-    void set(O object, P value);
+public interface Property {
+    public String getName();
+    public Class<?> getType();
+    public boolean canGet();
+    public boolean canSet();
+    public Object get(Object object);
+    public void set(Object object, Object value);
 }

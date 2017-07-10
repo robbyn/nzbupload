@@ -3,32 +3,29 @@ package org.tastefuljava.json;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.tastefuljava.props.Properties;
+import org.tastefuljava.props.Property;
+import org.tastefuljava.util.InvocationLogger;
 
 public class JSon {
     private static final Logger LOG = Logger.getLogger(JSon.class.getName());
 
-
     public static <T> T parse(Reader in, Class<T> clazz)
             throws IOException {
         Handler handler = new Handler(clazz);
-        JSonHandler jsonHandler = LOG.isLoggable(Level.FINE)
-                ? createLogger(JSonHandler.class, handler)
-                : handler;
+        JSonHandler jsonHandler = InvocationLogger.wrap(
+                Level.INFO, handler, JSonHandler.class);
         JSonParser.parse(in, jsonHandler);
         return clazz.cast(handler.top);
     }
@@ -56,29 +53,14 @@ public class JSon {
                 }
                 handler.endArray();
             } else {
+                Map<String,Property> props = Properties.classProperties(clazz);
                 handler.startObject();
-                for (Class<?> cl = clazz; cl != Object.class;
-                        cl = cl.getSuperclass()) {
-                    for (Field field: cl.getDeclaredFields()) {
-                        int mods = field.getModifiers();
-                        if (!Modifier.isStatic(mods)
-                                && !Modifier.isTransient(mods)
-                                && !field.getName().startsWith("this$")
-                                && !field.getName().startsWith("val$")) {
-                            try {
-                                field.setAccessible(true);
-                                Object value = field.get(object);
-                                if (value != null) {
-                                    handler.startField(field.getName());
-                                    visit(value, handler);
-                                    handler.endField(field.getName());
-                                }
-                            } catch (IllegalArgumentException
-                                    | IllegalAccessException ex) {
-                                LOG.log(Level.SEVERE, "Cannot access field "
-                                        + field.getName(), ex);
-                            }
-                        }
+                for (Property prop: props.values()) {
+                    Object value = prop.get(object);
+                    if (value != null) {
+                        handler.startField(prop.getName());
+                        visit(value, handler);
+                        handler.endField(prop.getName());
                     }
                 }
                 handler.endObject();
@@ -115,22 +97,21 @@ public class JSon {
         public void startField(String name) {
             classStack.add(0, clazz);
             Object object = stack.get(0);
-            Field field = accessField(object.getClass(), name);
-            clazz = field == null ? Object.class : field.getType();
+            Map<String, Property> props
+                    = Properties.classProperties(object.getClass());
+            Property prop = props.get(name);
+            clazz = prop == null ? Object.class : prop.getType();
         }
 
         @Override
         public void endField(String name) {
-            try {
-                clazz = classStack.remove(0);
-                Object object = stack.get(0);
-                Field field = accessField(clazz, name);
-                if (field != null) {
-                    field.set(object, convert(top, field.getType()));
-                }
-            } catch (IllegalAccessException | IllegalArgumentException ex) {
-                LOG.log(Level.SEVERE, "Error setting field value", ex);
-                throw new RuntimeException(ex.getMessage());
+            clazz = classStack.remove(0);
+            Object object = stack.get(0);
+            Map<String, Property> props
+                    = Properties.classProperties(object.getClass());
+            Property prop = props.get(name);
+            if (prop != null && prop.canSet()) {
+                prop.set(object, convert(top, prop.getType()));
             }
         }
 
@@ -189,25 +170,6 @@ public class JSon {
             top = value;
         }
 
-        private static Field accessField(Class<?> cl, String name) {
-            try {
-                while (cl != Object.class) {
-                    try {
-                        Field field = cl.getDeclaredField(name);
-                        field.setAccessible(true);
-                        return field;
-                    } catch (NoSuchFieldException ex) {
-                        // ignore
-                    }
-                    cl = cl.getSuperclass();
-                }
-                return null;
-            } catch (SecurityException ex) {
-                LOG.log(Level.SEVERE, "Error accessing field", ex);
-                throw new RuntimeException(ex.getMessage());
-            }
-        }
-
         private static Object convert(Object value, Class<?> type) {
             if (value == null) {
                 return null;
@@ -251,27 +213,4 @@ public class JSon {
         }
     }
 
-    private static <T> T createLogger(Class<T> intf, final T delegate) {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Object proxy = Proxy.newProxyInstance(cl, new Class<?>[] {intf},
-                new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method,
-                            Object[] args) throws Throwable {
-                        StringBuilder buf = new StringBuilder(method.getName());
-                        buf.append('(');
-                        if (args != null && args.length > 0) {
-                            buf.append(args[0]);
-                            for (int i = 1; i < args.length; ++i) {
-                                buf.append(',');
-                                buf.append(args[i]);
-                            }
-                        }
-                        buf.append(')');
-                        LOG.info(buf.toString());
-                        return method.invoke(delegate, args);
-                    }                    
-                });
-        return intf.cast(proxy);
-    }
 }
