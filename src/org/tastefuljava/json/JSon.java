@@ -212,7 +212,7 @@ public class JSon {
             if (value == null) {
                 return null;
             } else if (type.isAssignableFrom(value.getClass())) {
-                return value;
+                return type.cast(value);
             } else if ((type == boolean.class || type == Boolean.class)
                     && value.getClass() == Boolean.class) {
                 return value;
@@ -260,15 +260,11 @@ public class JSon {
                             Object[] args) throws Throwable {
                         StringBuilder buf = new StringBuilder(method.getName());
                         buf.append('(');
-                        if (args != null) {
-                            boolean first = true;
-                            for (Object arg: args) {
-                                if (first) {
-                                    first = false;
-                                } else {
-                                    buf.append(',');
-                                }
-                                buf.append(arg);
+                        if (args != null && args.length > 0) {
+                            buf.append(args[0]);
+                            for (int i = 1; i < args.length; ++i) {
+                                buf.append(',');
+                                buf.append(args[i]);
                             }
                         }
                         buf.append(')');
