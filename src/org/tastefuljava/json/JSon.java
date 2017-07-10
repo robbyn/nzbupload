@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,7 +22,6 @@ import java.util.logging.Logger;
 public class JSon {
     private static final Logger LOG = Logger.getLogger(JSon.class.getName());
 
-    private static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
     public static <T> T parse(Reader in, Class<T> clazz)
             throws IOException {
@@ -43,7 +43,7 @@ public class JSon {
         } else if (object instanceof String) {
             handler.handleString((String)object);
         } else if (object instanceof Date) {
-            handler.handleString(formatDate((Date)object, DATE_FORMAT));
+            handler.handleString(JSonDates.format((Date)object));
         } else {
             Class<?> clazz = object.getClass();
             if (clazz.isArray()) {
@@ -237,7 +237,7 @@ public class JSon {
                             + type);
                 }
             } else if (type == Date.class && value instanceof String) {
-                return parseDate((String)value, DATE_FORMAT);
+                return JSonDates.parse((String)value);
             } else if (Enum.class.isAssignableFrom(type)
                     && value instanceof String) {
                 @SuppressWarnings("unchecked")
@@ -277,20 +277,5 @@ public class JSon {
                     }                    
                 });
         return intf.cast(proxy);
-    }
-
-    private static String formatDate(Date date, String pattern) {
-        SimpleDateFormat format = new SimpleDateFormat(pattern);
-        return format.format(date);
-    }
-
-    private static Date parseDate(String s, String pattern) {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat(pattern);
-            return format.parse(s);
-        } catch (ParseException ex) {
-            LOG.log(Level.SEVERE, "Invalid date " + s, ex);
-            throw new IllegalArgumentException(ex.getMessage());
-        }
     }
 }

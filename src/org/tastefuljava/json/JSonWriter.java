@@ -9,7 +9,6 @@ import java.util.Date;
 
 public class JSonWriter {
     private final JSonHandler handler;
-    private DateFormat dateTimeFormat;
 
     public JSonWriter(JSonHandler handler) {
         this.handler = handler;
@@ -167,14 +166,7 @@ public class JSonWriter {
     }
 
     private void handleDate(Date date) {
-        String s = getDateTimeFormat().format(date);
+        String s = JSonDates.format(date);
         handler.handleString(s);
-    }
-
-    private DateFormat getDateTimeFormat() {
-        if (dateTimeFormat == null) {
-            dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        }
-        return dateTimeFormat;
     }
 }
