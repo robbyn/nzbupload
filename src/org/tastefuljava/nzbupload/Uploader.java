@@ -124,7 +124,7 @@ public class Uploader implements Runnable {
         multipart.addFile("name", file);
         String json = multipart.complete();
         Reader reader = new StringReader(json);
-        UploadResult result = JSon.parse(reader, UploadResult.class);
+        UploadResult result = JSon.read(reader, UploadResult.class);
         if (!result.status) {
             throw new IOException("Upload failed: " + result.error);
         }

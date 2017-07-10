@@ -26,11 +26,11 @@ import org.tastefuljava.util.InvocationLogger;
 public class JSon {
     private static final Logger LOG = Logger.getLogger(JSon.class.getName());
 
-    public static <T> T parse(String json, Class<T> clazz) throws IOException {
-        return parse(new StringReader(json), clazz);
+    public static <T> T read(String json, Class<T> clazz) throws IOException {
+        return read(new StringReader(json), clazz);
     }
 
-    public static <T> T parse(Reader in, Class<T> clazz)
+    public static <T> T read(Reader in, Class<T> clazz)
             throws IOException {
         Handler handler = new Handler(clazz);
         JSonHandler jsonHandler = InvocationLogger.wrap(

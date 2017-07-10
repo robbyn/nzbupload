@@ -43,7 +43,7 @@ public class JSonTest {
         TestObject obj1 = new TestObject();
         String json1 = JSon.stringify(obj1, false);
         LOG.log(Level.INFO, "JSon: {0}", json1);
-        TestObject obj2 = JSon.parse(json1, TestObject.class);
+        TestObject obj2 = JSon.read(json1, TestObject.class);
         assertEquals(obj1, obj2);
         String json2 = JSon.stringify(obj2, false);
         assertEquals(json1, json2);
@@ -57,7 +57,7 @@ public class JSonTest {
                     new int[] {1,2,3});
             String json1 = JSon.stringify(obj1, true);
             LOG.log(Level.INFO, "JSon: {0}", json1);
-            TestObject obj2 = JSon.parse(json1, TestObject.class);
+            TestObject obj2 = JSon.read(json1, TestObject.class);
             assertEquals(obj1, obj2);
             String json2 = JSon.stringify(obj2, true);
             assertEquals(json1, json2);
