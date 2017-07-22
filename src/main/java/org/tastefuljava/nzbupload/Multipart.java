@@ -24,7 +24,8 @@ public class Multipart implements Closeable {
                     .toCharArray();
     private static final int BOUNDARY_LENGTH = 32;
 
-    private final String boundary;
+    private final String boundary
+            = randomBoundary(BOUNDARY_CHARS, BOUNDARY_LENGTH);
     private final HttpURLConnection cnt;
     private final String encoding;
     private final OutputStream stream;
@@ -42,8 +43,6 @@ public class Multipart implements Closeable {
     public Multipart(String requestURL, String encoding)
             throws IOException {
         this.encoding = encoding;
-        boundary = randomBoundary(BOUNDARY_CHARS, BOUNDARY_LENGTH);
-
         URL url = new URL(requestURL);
         cnt = (HttpURLConnection) url.openConnection();
         cnt.setUseCaches(false);
