@@ -106,12 +106,9 @@ public class Uploader implements Runnable {
     }
 
     private String[] findInputFiles(File inputDir) {
-        return inputDir.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                File file = new File(dir, name);
-                return file.isFile() && name.toLowerCase().endsWith(".nzb");
-            }
+        return inputDir.list((File dir, String name) -> {
+            File file = new File(dir, name);
+            return file.isFile() && name.toLowerCase().endsWith(".nzb");
         });
     }
 
