@@ -7,7 +7,7 @@ import java.io.StringReader;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.tastefuljava.json.JSon;
+import org.tastefuljava.jsonia.JSon;
 
 public class Uploader implements Runnable {
     private static final Logger LOG = Logger.getLogger(Uploader.class.getName());
